@@ -10,6 +10,7 @@
    namespace docstring) — the equivalent of what
    `(clojure.data.json/read-str json-text)` would have produced."
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [cad-import.part :as part]
             [cad-import.ingest.gltf :as gltf]))
 
@@ -43,7 +44,7 @@
   (let [[status asm] (gltf/from-gltf-map (minimal-doc))
         p (first (:parts asm))]
     (is (= status :ok))
-    (is (clojure.string/starts-with? (get-in p [:source :uri]) "gltf://"))
+    (is (str/starts-with? (get-in p [:source :uri]) "gltf://"))
     (is (= (get-in p [:source :license]) "MIT"))))
 
 (deftest ingest-rejects-missing-vehicle-annotation

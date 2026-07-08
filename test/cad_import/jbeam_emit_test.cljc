@@ -3,6 +3,7 @@
    original kami-cad-import crate (kotoba-lang/kami-engine, deleted PR
    #82). ADR-2607010930."
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [cad-import.part :as part]
             [cad-import.jbeam-emit :as je]))
 
@@ -62,11 +63,11 @@
           total (count beams)
           hp-hood-beam (nth beams (- total 2))
           hp-wheel-beam (nth beams (- total 1))]
-      (is (clojure.string/starts-with? (:n1 hp-hood-beam) "chassis_"))
-      (is (clojure.string/starts-with? (:n2 hp-hood-beam) "hood_"))
+      (is (str/starts-with? (:n1 hp-hood-beam) "chassis_"))
+      (is (str/starts-with? (:n2 hp-hood-beam) "hood_"))
       (let [n2w (:n2 hp-wheel-beam)]
-        (is (or (clojure.string/starts-with? n2w "wheel_fl_axle_")
-                (clojure.string/starts-with? n2w "wheel_fl_r"))
+        (is (or (str/starts-with? n2w "wheel_fl_axle_")
+                (str/starts-with? n2w "wheel_fl_r"))
             (str "wheel anchor was " n2w))))))
 
 (deftest round-trips-through-kami-vehicle-jbeam-shape

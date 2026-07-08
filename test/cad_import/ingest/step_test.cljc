@@ -10,14 +10,15 @@
    portable). This test instead covers the one piece that *is*
    ported: the pure `freecad-script` string builder."
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [cad-import.ingest.step :as step]))
 
 (deftest freecad-script-embeds-input-and-output-paths
   (let [script (step/freecad-script "/tmp/in.step" "/tmp/out.gltf")]
-    (is (clojure.string/includes? script "/tmp/in.step"))
-    (is (clojure.string/includes? script "/tmp/out.gltf"))
-    (is (clojure.string/includes? script "Import.insert"))
-    (is (clojure.string/includes? script "ImportGui.export"))))
+    (is (str/includes? script "/tmp/in.step"))
+    (is (str/includes? script "/tmp/out.gltf"))
+    (is (str/includes? script "Import.insert"))
+    (is (str/includes? script "ImportGui.export"))))
 
 (deftest default-step-options-has-gltf-ingest-defaults
   (let [opts (step/default-step-options)]

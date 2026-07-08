@@ -23,10 +23,13 @@
             [vehicle.vec3 :as v3]
             [vehicle.ground :as ground]))
 
+(defn- finite? [n]
+  #?(:clj (Double/isFinite n) :cljs (js/Number.isFinite n)))
+
 (defn- finite-node-positions [v]
   (every? (fn [n]
             (let [{:keys [x y z]} (:position n)]
-              (and (Double/isFinite x) (Double/isFinite y) (Double/isFinite z))))
+              (and (finite? x) (finite? y) (finite? z))))
           (:nodes v)))
 
 (defn- step-for [v grnd frames dt]
