@@ -30,7 +30,8 @@
      \"license\": \"<spdx>\", \"cdxJson\": \"<full CycloneDX 1.5 document, JSON string>\"
    }
    ```"
-  (:require [cad-import.part :as part]
+  (:require [clojure.string :as str]
+            [cad-import.part :as part]
             [cad-import.sbom :as sbom]))
 
 (def default-endpoint
@@ -77,10 +78,10 @@
 (defn- shell-escape
   "Single-quote with embedded `'` -> `'\\''` substitution."
   [s]
-  (str "'" (clojure.string/replace s "'" "'\\''") "'"))
+  (str "'" (str/replace s "'" "'\\''") "'"))
 
 (defn- json-escape-string [s]
-  (str "\"" (clojure.string/escape s {\" "\\\"" \\ "\\\\" \newline "\\n" \tab "\\t"}) "\""))
+  (str "\"" (str/escape s {\" "\\\"" \\ "\\\\" \newline "\\n" \tab "\\t"}) "\""))
 
 (defn edn->json
   "Minimal recursive EDN->JSON string encoder — covers the small subset
@@ -97,8 +98,8 @@
     (keyword? x) (json-escape-string (name x))
     (boolean? x) (str x)
     (number? x) (str x)
-    (map? x) (str "{" (clojure.string/join "," (map (fn [[k v]] (str (json-escape-string (if (keyword? k) (name k) (str k))) ":" (edn->json v))) x)) "}")
-    (sequential? x) (str "[" (clojure.string/join "," (map edn->json x)) "]")
+    (map? x) (str "{" (str/join "," (map (fn [[k v]] (str (json-escape-string (if (keyword? k) (name k) (str k))) ":" (edn->json v))) x)) "}")
+    (sequential? x) (str "[" (str/join "," (map edn->json x)) "]")
     :else (json-escape-string (str x))))
 
 (defn curl-command
@@ -113,18 +114,14 @@
    (let [[status req] (register-request asm opts)]
      (if (= status :error)
        [:error req]
-       (let [body-json (edn->json (:body req))
-             sb (StringBuilder.)]
-         (.append sb "curl -fsSL")
-         (.append sb " -X ")
-         (.append sb ^String (:method req))
-         (.append sb " \\\n  ")
-         (.append sb ^String (shell-escape (:url req)))
-         (doseq [[k v] (:headers req)]
-           (.append sb " \\\n  -H ")
-           (.append sb ^String (shell-escape (str k ": " v))))
-         (when-not (:bearer-token opts)
-           (.append sb " \\\n  -H \"Authorization: Bearer ${etzhayyim_TOKEN:?etzhayyim_TOKEN must be set, run: gftd agent-token --lxm app.etzhayyim.sbom.registerArtifact}\""))
-         (.append sb " \\\n  --data ")
-         (.append sb ^String (shell-escape body-json))
-         [:ok (.toString sb)])))))
+       (let [body-json (edn->json (:body req))]
+         [:ok (apply str
+                      "curl -fsSL"
+                      " -X " (:method req)
+                      " \\\n  " (shell-escape (:url req))
+                      (concat
+                       (mapcat (fn [[k v]] [" \\\n  -H " (shell-escape (str k ": " v))])
+                               (:headers req))
+                       (when-not (:bearer-token opts)
+                         [" \\\n  -H \"Authorization: Bearer ${etzhayyim_TOKEN:?etzhayyim_TOKEN must be set, run: gftd agent-token --lxm app.etzhayyim.sbom.registerArtifact}\""])
+                       [" \\\n  --data " (shell-escape body-json)]))])))))

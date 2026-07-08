@@ -9,8 +9,8 @@
    Restored from kami-cad-import (kotoba-lang/kami-engine, deleted PR #82,
    \"Remove Rust workspace\"), per ADR-2607010930. Ported 1:1 from the
    original `src/demos/roadster.rs`."
-  (:require [cad-import.ingest.scad :as scad]
-            [cad-import.part :as part]))
+  (:require [clojure.string :as str]
+            [cad-import.ingest.scad :as scad]))
 
 (defn roadster-na []
   (let [wheelbase 2.27
@@ -68,7 +68,7 @@
                           ["fender_fr" (* track-f 0.5) "Front fender R"]
                           ["fender_rl" (- (* track-r 0.5)) "Rear fender L"]
                           ["fender_rr" (* track-r 0.5) "Rear fender R"]]
-              :let [z (if (clojure.string/includes? id "_f") (* wheelbase 0.5) (- (* wheelbase 0.5)))]]
+              :let [z (if (str/includes? id "_f") (* wheelbase 0.5) (- (* wheelbase 0.5)))]]
           (entity (scad/cube [0.06 0.30 0.45])
                    (scad/translate default-t x (- belt-y 0.05) z)
                    {:part-id id :display-name nm :kind :body :material :steel-mild

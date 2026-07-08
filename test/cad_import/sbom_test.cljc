@@ -3,6 +3,7 @@
    original kami-cad-import crate (kotoba-lang/kami-engine, deleted PR
    #82). ADR-2607010930."
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [cad-import.part :as part]
             [cad-import.sbom :as sbom]))
 
@@ -22,7 +23,7 @@
     (is (= status :ok))
     (is (= (get v "bomFormat") "CycloneDX"))
     (is (= (get v "specVersion") "1.5"))
-    (is (clojure.string/starts-with? (get-in v ["serialNumber"]) "urn:uuid:"))
+    (is (str/starts-with? (get-in v ["serialNumber"]) "urn:uuid:"))
     (is (= (get-in v ["metadata" "component" "type"]) "device"))
     (is (= (get-in v ["metadata" "component" "bom-ref"]) "v1"))
     (is (= (get-in v ["components" 0 "type"]) "device"))
@@ -35,12 +36,12 @@
         [status v] (sbom/emit a)
         purl (get-in v ["components" 0 "purl"])]
     (is (= status :ok))
-    (is (clojure.string/starts-with? purl "pkg:gftd-vehicle/v1/part/rail@1.0.0?"))
-    (is (clojure.string/includes? purl "supplier=Toray"))
-    (is (clojure.string/includes? purl "mpn=T700S-12K"))
-    (is (clojure.string/includes? purl "material=steel-hss"))
-    (is (clojure.string/includes? purl "kind=chassis"))
-    (is (clojure.string/includes? purl "license=MIT"))))
+    (is (str/starts-with? purl "pkg:gftd-vehicle/v1/part/rail@1.0.0?"))
+    (is (str/includes? purl "supplier=Toray"))
+    (is (str/includes? purl "mpn=T700S-12K"))
+    (is (str/includes? purl "material=steel-hss"))
+    (is (str/includes? purl "kind=chassis"))
+    (is (str/includes? purl "license=MIT"))))
 
 (deftest evidence-carries-sha256
   (let [a (-> (part/new-assembly "v1" (provenance)) (part/add-part (mk-part "rail" :chassis :steel-hss)))
@@ -98,4 +99,6 @@
         by-name (into {} (map (fn [p] [(get p "name") (get p "value")]) props))]
     (is (= status :ok))
     (is (= (get by-name "cdx:gftd:vehicle:part_count") "2"))
-    (is (> (Double/parseDouble (get by-name "cdx:gftd:vehicle:total_mass_kg")) 0.0))))
+    (is (> #?(:clj (Double/parseDouble (get by-name "cdx:gftd:vehicle:total_mass_kg"))
+              :cljs (js/parseFloat (get by-name "cdx:gftd:vehicle:total_mass_kg")))
+           0.0))))

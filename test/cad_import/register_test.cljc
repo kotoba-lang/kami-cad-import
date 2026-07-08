@@ -3,6 +3,7 @@
    original kami-cad-import crate (kotoba-lang/kami-engine, deleted PR
    #82). ADR-2607010930."
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [cad-import.part :as part]
             [cad-import.register :as reg]))
 
@@ -20,8 +21,8 @@
         [status req] (reg/register-request a)]
     (is (= status :ok))
     (is (= (:method req) "POST"))
-    (is (clojure.string/includes? (:url req) "/xrpc/app.etzhayyim.sbom.registerArtifact"))
-    (is (clojure.string/starts-with? (:url req) "https://atproto.etzhayyim.com"))))
+    (is (str/includes? (:url req) "/xrpc/app.etzhayyim.sbom.registerArtifact"))
+    (is (str/starts-with? (:url req) "https://atproto.etzhayyim.com"))))
 
 (deftest body-carries-vehicle-metadata
   (let [a (-> (part/new-assembly "v1" (provenance))
@@ -51,10 +52,10 @@
   (let [a (-> (part/new-assembly "v1" (provenance)) (part/add-part (mk-part "rail" :chassis :steel-hss)))
         [status cmd] (reg/curl-command a)]
     (is (= status :ok))
-    (is (clojure.string/starts-with? cmd "curl -fsSL -X POST"))
-    (is (clojure.string/includes? cmd "/xrpc/app.etzhayyim.sbom.registerArtifact"))
-    (is (clojure.string/includes? cmd "Content-Type: application/json"))
-    (is (clojure.string/includes? cmd "etzhayyim_TOKEN"))))
+    (is (str/starts-with? cmd "curl -fsSL -X POST"))
+    (is (str/includes? cmd "/xrpc/app.etzhayyim.sbom.registerArtifact"))
+    (is (str/includes? cmd "Content-Type: application/json"))
+    (is (str/includes? cmd "etzhayyim_TOKEN"))))
 
 (deftest endpoint-override-respected
   (let [a (-> (part/new-assembly "v1" (provenance)) (part/add-part (mk-part "rail" :chassis :steel-hss)))
@@ -62,4 +63,4 @@
                     :endpoint "https://staging.atproto.etzhayyim.com/xrpc/app.etzhayyim.sbom.registerArtifact")
         [status req] (reg/register-request a opts)]
     (is (= status :ok))
-    (is (clojure.string/starts-with? (:url req) "https://staging."))))
+    (is (str/starts-with? (:url req) "https://staging."))))

@@ -15,10 +15,18 @@
    `VehiclePart` becomes a CycloneDX component with `\"type\": \"device\"`
    — the closest first-class fit for a physical car part in CDX 1.5. The
    full spec is at <https://cyclonedx.org/docs/1.5/json/>."
-  (:require [cad-import.part :as part]))
+  (:require [clojure.string :as str]
+            [cad-import.part :as part]))
 
 (def cdx-spec-version "1.5")
 (def prop-ns "cdx:gftd:vehicle")
+
+(defn- fmt4
+  "Portable fixed 4-decimal-place formatting (clojure.core/format wraps
+   java.util.Formatter -- JVM-only, no cljs equivalent)."
+  [n]
+  #?(:clj (format "%.4f" (double n))
+     :cljs (.toFixed n 4)))
 
 (defn material-label [m]
   (case m
@@ -56,17 +64,34 @@
     :press "press"
     :adhesive "adhesive"))
 
+(def ^:private hex-digits "0123456789ABCDEF")
+
+(defn- byte->pct [b]
+  (let [b (bit-and b 0xFF)]
+    (str "%" (nth hex-digits (bit-shift-right b 4)) (nth hex-digits (bit-and b 0xF)))))
+
+(defn- pct-encode-char
+  "Percent-encode `c`'s UTF-8 bytes (`.getBytes` has no cljs equivalent;
+   `TextEncoder` is the portable substitute)."
+  [c]
+  #?(:clj (apply str (map byte->pct (.getBytes (str c) "UTF-8")))
+     :cljs (apply str (map byte->pct (js/Array.from (.encode (js/TextEncoder.) c))))))
+
 (defn urlencode
   "Minimal `application/x-www-form-urlencoded`-compatible escaper. Kept
    in-namespace to avoid pulling a URL-encoding dependency for one
-   helper (zero-dependency requirement, ADR-2607010930)."
+   helper (zero-dependency requirement, ADR-2607010930). ASCII
+   alnum + `-._~` pass through unescaped, matching conventional
+   percent-encoding (unlike `Character/isLetterOrDigit`, which the
+   original JVM-only version used and which treats any Unicode letter
+   as \"safe\" — non-standard for URL encoding, and unreachable from
+   cljs anyway)."
   [s]
   (apply str
          (for [c s]
-           (if (or (Character/isLetterOrDigit ^char c) (contains? #{\- \. \_ \~} c))
+           (if (or (re-matches #"[A-Za-z0-9]" (str c)) (contains? #{\- \. \_ \~} c))
              c
-             (apply str (for [b (.getBytes (str c) "UTF-8")]
-                          (format "%%%02X" (bit-and b 0xFF))))))))
+             (pct-encode-char c)))))
 
 (defn- synth-purl [asm p]
   (let [q (cond-> []
@@ -80,14 +105,14 @@
               (conj (str "license=" (urlencode (get-in p [:source :license])))))]
     (str "pkg:gftd-vehicle/" (urlencode (:vehicle-id asm))
          "/part/" (urlencode (:id p)) "@" (urlencode (:revision p))
-         "?" (clojure.string/join "&" q))))
+         "?" (str/join "&" q))))
 
 (defn- vehicle-purl [asm]
   (str "pkg:gftd-vehicle/" (urlencode (:vehicle-id asm)) "@" (urlencode (:revision asm))))
 
 (defn- build-part-component [asm p]
   (let [props (cond-> [{"name" (str prop-ns ":break_group") "value" (str (part/effective-break-group p))}
-                        {"name" (str prop-ns ":mass_kg") "value" (format "%.4f" (part/effective-mass-kg p))}
+                        {"name" (str prop-ns ":mass_kg") "value" (fmt4 (part/effective-mass-kg p))}
                         {"name" (str prop-ns ":material") "value" (material-label (:material p))}
                         {"name" (str prop-ns ":kind") "value" (kind-label (:kind p))}]
                  (:parent p)
@@ -124,7 +149,7 @@
                            "concludedValue" (get-in asm [:source :sha256])
                            "methods" [{"technique" "filename" "confidence" 1.0
                                        "value" (get-in asm [:source :uri])}]}}
-   "properties" [{"name" (str prop-ns ":total_mass_kg") "value" (format "%.4f" (part/total-mass-kg asm))}
+   "properties" [{"name" (str prop-ns ":total_mass_kg") "value" (fmt4 (part/total-mass-kg asm))}
                  {"name" (str prop-ns ":part_count") "value" (str (count (:parts asm)))}
                  {"name" (str prop-ns ":hardpoint_count") "value" (str (count (:hardpoints asm)))}]})
 
@@ -153,7 +178,7 @@
    valid v5 layout (RFC 4122 §4.3 stub) for the sole purpose of
    producing a stable URN per vehicle source hash."
   [seed-hex]
-  (let [hex-chars (filter #(>= (Character/digit ^char % 16) 0) (seq seed-hex))
+  (let [hex-chars (filter #(re-matches #"[0-9a-fA-F]" (str %)) (seq seed-hex))
         hex-chars (->> hex-chars cycle (take 32) vec)
         hex-chars (assoc hex-chars 12 \5)
         c16 (nth hex-chars 16)
