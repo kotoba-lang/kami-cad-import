@@ -48,6 +48,16 @@
     (is (= status :ok))
     (is (= v "Bearer eyJ.testtoken"))))
 
+(deftest edn->json-escapes-every-c0-control-character
+  ;; RFC 8259 requires EVERY control character U+0000-U+001F to be
+  ;; escaped, not just \n and \t -- ingested CAD-file metadata (a glTF
+  ;; asset.copyright string, a STEP header) can genuinely carry a raw \r
+  ;; or other control byte. Verified against Python's strict json module:
+  ;; the unescaped version was rejected as invalid JSON.
+  (let [payload (str "MIT" (char 13) "OR" (char 13) "Apache-2.0" (char 1))
+        out (reg/edn->json {:license payload})]
+    (is (= "{\"license\":\"MIT\\rOR\\rApache-2.0\\u0001\"}" out))))
+
 (deftest curl-command-is-runnable
   (let [a (-> (part/new-assembly "v1" (provenance)) (part/add-part (mk-part "rail" :chassis :steel-hss)))
         [status cmd] (reg/curl-command a)]
