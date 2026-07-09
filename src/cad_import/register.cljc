@@ -80,8 +80,31 @@
   [s]
   (str "'" (str/replace s "'" "'\\''") "'"))
 
+(def ^:private hex-digits "0123456789abcdef")
+
+(defn- hex4
+  "4-digit hex for a JSON `\\uXXXX` escape (portable: bit ops + a lookup
+  table, no Long/Integer interop that would only work on :clj)."
+  [n]
+  (apply str (for [shift [12 8 4 0]] (nth hex-digits (bit-and (bit-shift-right n shift) 0xf)))))
+
+(def ^:private json-string-escapes
+  "RFC 8259 §7: EVERY control character U+0000-U+001F must be escaped in a
+  JSON string, not just the handful with a named shorthand (\\b \\t \\n \\f
+  \\r) -- the previous map covered only \\n and \\t, so any other C0
+  control byte (verified reachable: ingested CAD-file metadata such as a
+  glTF `asset.copyright` string or a STEP header can carry a raw \\r or
+  other control byte) was copied through raw, producing a JSON string
+  literal with a literal control byte embedded in it -- invalid per
+  RFC 8259, confirmed with Python's strict json module rejecting it."
+  (into {\" "\\\"" \\ "\\\\"}
+        (for [i (range 0x20)]
+          [(char i) (case i
+                      8 "\\b" 9 "\\t" 10 "\\n" 12 "\\f" 13 "\\r"
+                      (str "\\u" (hex4 i)))])))
+
 (defn- json-escape-string [s]
-  (str "\"" (str/escape s {\" "\\\"" \\ "\\\\" \newline "\\n" \tab "\\t"}) "\""))
+  (str "\"" (str/escape s json-string-escapes) "\""))
 
 (defn edn->json
   "Minimal recursive EDN->JSON string encoder — covers the small subset
