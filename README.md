@@ -1,5 +1,14 @@
 # kami-cad-import
 
+`src/cad_transform_golden.kotoba` is the policy-v7 safety qualification slice
+for quaternion-derived scaled affine point transforms and parent/child
+composition. Tests compare the existing CLJC transform oracle with the Kotoba
+reference executor, restricted JavaScript, and typed Wasm without capabilities.
+
+CAD/GLTF/SCAD/STEP parsing, string metadata, general matrices, AABB collections,
+and asset emission remain CLJC boundaries until bounded parsers and a structured
+f64 collection/record ABI are qualified.
+
 CAD source (STEP / glTF / OpenSCAD) -> vehicle part graph -> JBeam topology
 + CycloneDX 1.5 SBOM, restored as portable zero-dependency CLJC.
 
