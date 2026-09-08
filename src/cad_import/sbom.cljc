@@ -15,7 +15,7 @@
    `VehiclePart` becomes a CycloneDX component with `\"type\": \"device\"`
    — the closest first-class fit for a physical car part in CDX 1.5. The
    full spec is at <https://cyclonedx.org/docs/1.5/json/>."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [cad-import.part :as part]))
 
 (def cdx-spec-version "1.5")

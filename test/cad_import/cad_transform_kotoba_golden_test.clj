@@ -1,7 +1,7 @@
 (ns cad-import.cad-transform-kotoba-golden-test
   (:require [cad-import.xform :as xform]
             [clojure.java.shell :as shell]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is]]
             [kotoba.compiler.core :as compiler]
             [kotoba.compiler.ir :as ir]))

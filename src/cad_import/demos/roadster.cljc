@@ -9,7 +9,7 @@
    Restored from kami-cad-import (kotoba-lang/kami-engine, deleted PR #82,
    \"Remove Rust workspace\"), per ADR-2607010930. Ported 1:1 from the
    original `src/demos/roadster.rs`."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [cad-import.ingest.scad :as scad]))
 
 (defn roadster-na []
@@ -147,7 +147,7 @@
                    (-> default-t
                        (scad/translate x 0.30 z)
                        (scad/rotate-xyzw 0.0 0.0 frac-1-sqrt-2 frac-1-sqrt-2))
-                   {:part-id id :display-name (str "Brake disc " (last (clojure.string/split id #"_")))
+                   {:part-id id :display-name (str "Brake disc " (last (str/split id #"_")))
                     :kind :brake :material :steel-mild :mass-kg 8.0 :parent "chassis"
                     :break-group nil :supplier {:name "Akebono" :cpe "" :mpn "ABK-NA-235"}
                     :revision "0.1.0" :source (prov-part "brake_disc")}))
