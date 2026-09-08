@@ -3,7 +3,7 @@
    original kami-cad-import crate (kotoba-lang/kami-engine, deleted PR
    #82). ADR-2607010930."
   (:require [clojure.test :refer [deftest is]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [cad-import.part :as part]
             [cad-import.jbeam-emit :as je]))
 

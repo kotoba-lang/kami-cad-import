@@ -30,7 +30,7 @@
      \"license\": \"<spdx>\", \"cdxJson\": \"<full CycloneDX 1.5 document, JSON string>\"
    }
    ```"
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [cad-import.part :as part]
             [cad-import.sbom :as sbom]))
 

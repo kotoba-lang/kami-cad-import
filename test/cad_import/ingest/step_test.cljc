@@ -10,7 +10,7 @@
    portable). This test instead covers the one piece that *is*
    ported: the pure `freecad-script` string builder."
   (:require [clojure.test :refer [deftest is]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [cad-import.ingest.step :as step]))
 
 (deftest freecad-script-embeds-input-and-output-paths

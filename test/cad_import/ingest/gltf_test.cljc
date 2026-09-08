@@ -10,7 +10,7 @@
    namespace docstring) — the equivalent of what
    `(clojure.data.json/read-str json-text)` would have produced."
   (:require [clojure.test :refer [deftest is]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [cad-import.part :as part]
             [cad-import.ingest.gltf :as gltf]))
 
