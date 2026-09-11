@@ -105,7 +105,7 @@ files) plus a namespace-loads smoke test for the root namespace:
 Run with:
 
 ```bash
-clojure -M:test
+kbb -M:test
 ```
 
 (pulls `kotoba-lang/kami-vehicle` as a test-only dependency for the two
