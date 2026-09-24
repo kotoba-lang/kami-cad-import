@@ -2,7 +2,7 @@
   "Ported 1:1 from `src/ingest/scad.rs`'s `#[cfg(test)] mod tests` in the
    original kami-cad-import crate (kotoba-lang/kami-engine, deleted PR
    #82). ADR-2607010930."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [cad-import.part :as part]
             [cad-import.ingest.scad :as scad]))
 
