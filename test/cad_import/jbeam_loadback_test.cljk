@@ -21,7 +21,7 @@
    aren't tuned for kami-vehicle's default damping (see
    `cad-import.jbeam-physics-smoke-test` for the settle/step smoke
    coverage that *is* ported, with generous tolerances)."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [cad-import.demos :as demos]
             [cad-import.jbeam-emit :as je]
             [vehicle.jbeam :as vjbeam]

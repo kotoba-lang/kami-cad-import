@@ -15,7 +15,7 @@
    (kami-cad-import, kotoba-lang/kami-engine, deleted PR #82),
    ADR-2607010930. Uses `vehicle.*` (kotoba-lang/kami-vehicle, also
    restored to CLJC under the same ADR) for the actual physics step."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [cad-import.demos :as demos]
             [cad-import.jbeam-emit :as je]
             [vehicle.jbeam :as vjbeam]

@@ -9,7 +9,7 @@
    Clojure map with string keys (see `cad-import.ingest.gltf`'s
    namespace docstring) — the equivalent of what
    `(clojure.data.json/read-str json-text)` would have produced."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [kotoba.lang.text :as str]
             [cad-import.part :as part]
             [cad-import.ingest.gltf :as gltf]))

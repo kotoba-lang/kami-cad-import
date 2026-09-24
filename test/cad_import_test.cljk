@@ -1,7 +1,7 @@
 (ns cad-import-test
   "Namespace-loads smoke test for the `cad-import` root namespace.
    Restored from kami-cad-import (deleted PR #82), ADR-2607010930."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [cad-import]
             [cad-import.part :as part]
             [cad-import.jbeam-emit]

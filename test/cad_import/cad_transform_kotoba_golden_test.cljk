@@ -2,7 +2,7 @@
   (:require [cad-import.xform :as xform]
             [clojure.java.shell :as shell]
             [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is]]
+            [kotoba.test :refer [deftest is]]
             [kotoba.compiler.core :as compiler]
             [kotoba.compiler.ir :as ir]))
 
