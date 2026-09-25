@@ -15,7 +15,7 @@
    `VehiclePart` becomes a CycloneDX component with `\"type\": \"device\"`
    — the closest first-class fit for a physical car part in CDX 1.5. The
    full spec is at <https://cyclonedx.org/docs/1.5/json/>."
-  (:require [kotoba.lang.text :as str]
+  (:require [kotoba.bytes :as kbytes] [kotoba.lang.text :as str]
             [cad-import.part :as part]))
 
 (def cdx-spec-version "1.5")
@@ -74,7 +74,7 @@
   "Percent-encode `c`'s UTF-8 bytes (`.getBytes` has no cljs equivalent;
    `TextEncoder` is the portable substitute)."
   [c]
-  #?(:clj (apply str (map byte->pct (.getBytes (str c) "UTF-8")))
+  #?(:clj (apply str (map byte->pct (kbytes/utf8-bytes (str c))))
      :cljs (apply str (map byte->pct (js/Array.from (.encode (js/TextEncoder.) c))))))
 
 (defn urlencode
